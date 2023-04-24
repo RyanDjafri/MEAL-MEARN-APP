@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const app = express();
 const authRouter = require("./routes/user.routes");
+const { checkUser, requireAuth } = require("./middleware/auth.middleware");
 require("dotenv").config({ path: "./config/.env" });
 require("./config/db");
 const corsOptions = {
@@ -19,6 +20,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.get("*", checkUser);
+app.get("/jwtid", requireAuth, (req, res) => {
+  res.status(200).send(res.locals.user._id);
+});
 app.use("/api/user", authRouter);
 
 app.listen(process.env.PORT, () => {
